@@ -73,7 +73,7 @@ class HTTP:
         p = multiprocessing.Pool(process_count)
         results = []
         for _ in range(process_count):
-            results.append(p.apply_async(request, args=[method, host, path, data, port, ssl]))
+            results.append(p.apply_async(method, args=[host, path, data, port, ssl]))
         p.close()
         p.join()
         return results
