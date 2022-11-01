@@ -1,101 +1,136 @@
-import socket
-import re
-import multiprocessing
 import ssl
-import urllib.parse
-import traceback
-import sys
-from .error import *
+import socket
+import multiprocessing
+import re
+from error import *
 
 class HTTP:
-    def __init__(self, host, port=80, ssl=False):
-        self.host = host
-        self.port = port
-        self.ssl = ssl
-        self.response = ''
-    
-    def _get_req(self, path, params=None):
-        if params:
-            path = f"{path}?{urllib.parse.urlencode(params)}"
-        self._request('GET', path)
-        return self.response
 
-    def get_req(self, path, params=None):
-        try:
-            return self._get_req(path, params)
-        except Exception as e:
-            print(str(e))
-            print(traceback.format_exc(file=sys.stdout))
-            raise RequestError()
-    
-    def _post_req(self, path, data, params=None):
-        if params:
-            path = f"{path}?{urllib.parse.urlencode(params)}"
-        self._request('POST', path, data)
-        return self.response
+    def __init__(self):
+        self.code = None
+        self.header = None
+        self.data = None
+        self.json = None
+        self.status = None
+        self.json_data = None
 
-    def post_req(self, path, data, params=None):
-        try:
-            return self._post_req(path, data, params)
-        except Exception as e:
-            print(str(e))
-            print(traceback.format_exc(file=sys.stdout))
-            raise RequestError()
-    
-    def _put_req(self, path, data, params=None):
-        if params:
-            path = f"{path}?{urllib.parse.urlencode(params)}"
-        self._request('PUT', path, data)
-        return self.response
-
-    def put_req(self, path, data, params=None):
-        try:
-            return self._put_req(path, data, params)
-        except Exception as e:
-            print(str(e))
-            print(traceback.format_exc(file=sys.stdout))
-            raise RequestError()
-    
-    def _request(self, method, path, data=''):
-        self.response = ''
-        if self.ssl:
+    def get_req(self, host, path, port=80, ssl=False):
+        if ssl:
             socket_ = ssl.wrap_socket(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
         else:
             socket_ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        socket_.connect((self.host, self.port))
+        socket_.connect((host, port))
+        socket_.send(
+            f"GET {path} HTTP/1.0\r\nHost: {host}\r\n\r\n".encode('utf-8')
+        )
+        data = socket_.recv(4096)
+        if socket_.fileno() != -1:
+            socket_.close()
+        if not data:
+            raise GetError(data)
+        return data
+
+
+    def post_req(self, host, path, data, port=80, ssl=False):
+        if ssl:
+            socket_ = ssl.wrap_socket(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
+        else:
+            socket_ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        socket_.connect((host, port))
+        socket_.send(
+            f"POST {path} HTTP/1.0\r\nHost: {host}\r\nContent-Length: {len(data)}\r\n\r\n{data}".encode('utf-8')
+        )
+        data = socket_.recv(4096)
+        if socket_.fileno() != -1:
+            socket_.close()
+        if not data:
+            raise PostError(data)
+        return data
+
+
+    def put_req(self, host, path, data, port=80, ssl=False):
+        if ssl:
+            socket_ = ssl.wrap_socket(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
+        else:
+            socket_ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        socket_.connect((host, port))
+        socket_.send(
+            f"PUT {path} HTTP/1.0\r\nHost: {host}\r\nContent-Length: {len(data)}\r\n\r\n{data}".encode('utf-8')
+        )
+        data = socket_.recv(4096)
+        if socket_.fileno() != -1:
+            socket_.close()
+        if not data:
+            raise PutError(data)
+        return data
+
+
+    def request(self, method, host, path, data='', port=80, ssl=False):
+        if ssl:
+            socket_ = ssl.wrap_socket(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
+        else:
+            socket_ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        socket_.connect((host, port))
         if data:
             socket_.send(
-                f"{method.upper()} {path} HTTP/1.0\r\nHost: {self.host}\r\nContent-Length: {len(data)}\r\n\r\n{data}".encode('utf-8')
+                f"{method.upper()} {path} HTTP/1.0\r\nHost: {host}\r\nContent-Length: {len(data)}\r\n\r\n{data}".encode('utf-8')
             )
         else:
             socket_.send(
-                f"{method.upper()} {path} HTTP/1.0\r\nHost: {self.host}\r\n\r\n".encode('utf-8')
+                f"{method.upper()} {path} HTTP/1.0\r\nHost: {host}\r\n\r\n".encode('utf-8')
             )
         data = socket_.recv(4096)
         if socket_.fileno() != -1:
             socket_.close()
         if not data:
             raise RequestError(data)
-        self.response = data
-        self._decode_response()
-    
-    def _decode_response(self):
-        response_header = self.response[:self.response.find(b'\r\n\r\n')].decode('utf-8')
-        response_data = self.response[self.response.find(b'\r\n\r\n') + 4:]
-        status_code = re.findall(r'HTTP/1.0 (.*?) ', response_header)[0]
-        response_headers = re.findall(r'(.*?): (.*?)\r\n', response_header)
-        self.response = {
-            'status_code': status_code,
-            'headers': {header[0]: header[1] for header in response_headers},
-            'data': response_data.decode(self.response.get('headers').get('Content-Type', 'utf-8'))
-        }
+        self._parse_data(data)
+        return data
 
 
-    def request_multiprocess(self, method, path, data='', process_count=1000):
+    def request_multiprocess(self, method, host, path, data='', port=80, ssl=False, process_count=1000):
         p = multiprocessing.Pool(process_count)
         results = []
         for _ in range(process_count):
-            results.append(p.apply_async(method, args=[path, data]))
+            results.append(p.apply_async(method, args=[host, path, data, port, ssl]))
         p.close()
         p.join()
         return results
+
+
+    def _parse_data(self, data):
+        self.code = re.findall('HTTP/1.0 \d\d\d .+\r\n', data)[0].split(' ')[1]
+        self.json_data = re.findall('\{.+\}', data)
+        self.json = self.json_data[0] if self.json_data else None
+        self.data = re.findall('\r\n\r\n.+\r\n', data)[0] if re.findall('\r\n\r\n.+\r\n', data) else None
+        self.header = re.findall('HTTP/1.0 \d\d\d .+\r\n.+\r\n', data)[0] if re.findall('HTTP/1.0 \d\d\d .+\r\n.+\r\n', data) else None
+        self.status = self.code if self.code else None
+
+
+    def parse_data(self, data):
+        self._parse_data(data)
+        return self.__dict__
+
+
+    def get_response_code(self):
+        return self.code
+
+
+    def get_status(self):
+        return self.status
+
+
+    def get_header(self):
+        return self.header
+
+
+    def get_json(self):
+        return self.json
+
+
+    def get_json_data(self):
+        return self.json_data
+
+
+    def get_data(self):
+        return self.data
