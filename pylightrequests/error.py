@@ -1,16 +1,37 @@
-class ErrorHandler:
-    def __init__(self, code, message, description):
-        self.code = code
-        self.message = message
-        self.description = description
-    
-    def __str__(self):
-        return f'Error: {self.description} ({self.code}) {self.message}'
+import traceback, logging
 
-class RequestError(ErrorHandler):
-    def __init__(self):
-        super().__init__(code="E00", message="Request Error", description="An error occured while communicating with the server.")
-
-class ResponseError(ErrorHandler):
+class GetError(Exception):
     def __init__(self, data):
-        super().__init__(code="E01", message="Response Error", description=f"Invalid response data: {data}")
+        tb = traceback.format_exc()
+        logging.error(tb)
+        self.error = f"GetError({data}) | {tb}"
+
+    def __str__(self):
+        return self.error
+
+class PostError(Exception):
+    def __init__(self, data):
+        tb = traceback.format_exc()
+        logging.error(tb)
+        self.error = f"PostError({data}) | {tb}"
+
+    def __str__(self):
+        return self.error
+
+class PutError(Exception):
+    def __init__(self, data):
+        tb = traceback.format_exc()
+        logging.error(tb)
+        self.error = f"PutError({data}) | {tb}"
+
+    def __str__(self):
+        return self.error
+
+class RequestError(Exception):
+    def __init__(self, data):
+        tb = traceback.format_exc()
+        logging.error(tb)
+        self.error = f"RequestError({data}) | {tb}"
+
+    def __str__(self):
+        return self.error
