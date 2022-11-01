@@ -2,7 +2,7 @@ import ssl
 import socket
 import multiprocessing
 import re
-from error import *
+from .error import *
 
 class HTTP:
 
