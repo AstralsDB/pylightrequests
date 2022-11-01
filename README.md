@@ -34,21 +34,47 @@ from pylightrequests import *
 ```python
 from pylightrequests import *
 
+http = HTTP()
+
 # Get request
-get_req('google.com', '/')
-parse_data(get_req('google.com', '/'))
+print(http.get_req('google.com', '/'))
+
 
 # Post request
-post_req('google.com', '/', 'data')
-parse_data(post_req('google.com', '/', 'data'))
+print(http.post_req('google.com', '/', 'Hello World!'))
+
 
 # Put request
-put_req('google.com', '/', 'data')
-parse_data(put_req('google.com', '/', 'data'))
+print(http.put_req('google.com', '/', 'Hello World!'))
 
-# Request
-request('get', 'google.com', '/')
-parse_data(request('get', 'google.com', '/'))
+
+# Request (method is up to you)
+print(http.request('get', 'google.com', '/'))
+
+
+# Request (multiprocess)
+print(http.request_multiprocess('get', 'google.com', '/'))
+
+# Parse data
+print(http.parse_data(http.request('get', 'google.com', '/')))
+
+# Get response code
+print(http.get_response_code())
+
+# Get status
+print(http.get_status())
+
+# Get header
+print(http.get_header())
+
+# Get json
+print(http.get_json())
+
+# Get json data
+print(http.get_json_data())
+
+# Get data
+print(http.get_data())
 ```
 
 
