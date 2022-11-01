@@ -2,6 +2,7 @@ import ssl
 import socket
 import re
 import multiprocessing
+from error import *
 
 class HTTP:
     def get_req(self, host, path, port=80, ssl=False):
@@ -9,13 +10,15 @@ class HTTP:
             socket_ = ssl.wrap_socket(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
         else:
             socket_ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            socket_.connect((host, port))
-            socket_.send(
+        socket_.connect((host, port))
+        socket_.send(
             f"GET {path} HTTP/1.0\r\nHost: {host}\r\n\r\n".encode('utf-8')
-            )
-            data = socket_.recv(4096)
+        )
+        data = socket_.recv(4096)
         if socket_.fileno() != -1:
             socket_.close()
+        if not data:
+            raise GetError(data)
         return data
 
 
@@ -31,6 +34,8 @@ class HTTP:
         data = socket_.recv(4096)
         if socket_.fileno() != -1:
             socket_.close()
+        if not data:
+            raise PostError(data)
         return data
 
 
@@ -46,6 +51,8 @@ class HTTP:
         data = socket_.recv(4096)
         if socket_.fileno() != -1:
             socket_.close()
+        if not data:
+            raise PutError(data)
         return data
 
 
@@ -66,6 +73,8 @@ class HTTP:
         data = socket_.recv(4096)
         if socket_.fileno() != -1:
             socket_.close()
+        if not data:
+            raise RequestError(data)
         return data
 
 
