@@ -34,35 +34,21 @@ from pylightrequests import *
 ```python
 from pylightrequests import *
 
-http = HTTP('example.com')
+# Get request
+get_req('google.com', '/')
+parse_data(get_req('google.com', '/'))
 
-# GET REQUEST
+# Post request
+post_req('google.com', '/', 'data')
+parse_data(post_req('google.com', '/', 'data'))
 
+# Put request
+put_req('google.com', '/', 'data')
+parse_data(put_req('google.com', '/', 'data'))
 
-# with params
-http.get_req('/', {'q': 'search'})
-
-# without params
-http.get_req('/')
-
-# POST REQUEST
-
-# with params
-http.post_req('/', {'q': 'search'})
-
-# without params
-http.post_req('/')
-
-# PUT REQUEST
-
-# with params
-http.put_req('/', {'q': 'search'})
-
-# without params
-http.put_req('/')
-
-# REQUEST
-http.request('GET', '/')
+# Request
+request('get', 'google.com', '/')
+parse_data(request('get', 'google.com', '/'))
 ```
 
 
