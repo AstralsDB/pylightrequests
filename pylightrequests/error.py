@@ -1,63 +1,16 @@
-class Error(Exception):
-    def __init__(self, msg):
-        self.msg = msg
+class ErrorHandler:
+    def __init__(self, code, message, description):
+        self.code = code
+        self.message = message
+        self.description = description
+    
+    def __str__(self):
+        return f'Error: {self.description} ({self.code}) {self.message}'
 
-class ResponseError(Error):
-    def __init__(self, response):
-        self.response = response
-        super().__init__("The response is bad.")
+class RequestError(ErrorHandler):
+    def __init__(self):
+        super().__init__(code="E00", message="Request Error", description="An error occured while communicating with the server.")
 
-class DecodeError(Error):
-    def __init__(self, response):
-        self.response = response
-        super().__init__("The response cannot be decoded.")
-
-class ProxyError(Error):
-    def __init__(self, response):
-        self.response = response
-        super().__init__("The request cannot use proxy.")
-
-class TimeoutError(Error):
-    def __init__(self, url):
-        self.url = url
-        super().__init__("The request is timeout.")
-
-class BadRequestError(Error):
-    def __init__(self, response):
-        self.response = response
-        super().__init__("The request is bad.")
-
-class SSLError(Error):
-    def __init__(self, response):
-        self.response = response
-        super().__init__("The request cannot use SSL.")
-
-class RequestError(Error):
-    def __init__(self, response):
-        self.response = response
-        super().__init__("The request is failed.")
-
-class GetError(Error):
-    def __init__(self, response):
-        self.response = response
-        super().__init__("The GET request is failed.")
-
-class PostError(Error):
-    def __init__(self, response):
-        self.response = response
-        super().__init__("The POST request is failed.")
-
-class PutError(Error):
-    def __init__(self, response):
-        self.response = response
-        super().__init__("The PUT request is failed.")
-
-class DeleteError(Error):
-    def __init__(self, response):
-        self.response = response
-        super().__init__("The DELETE request is failed.")
-
-class MethodError(Error):
-    def __init__(self, response):
-        self.response = response
-        super().__init__("The request is not supported.")
+class ResponseError(ErrorHandler):
+    def __init__(self, data):
+        super().__init__(code="E01", message="Response Error", description=f"Invalid response data: {data}")
