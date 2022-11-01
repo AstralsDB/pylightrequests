@@ -3,6 +3,8 @@ import re
 import multiprocessing
 import ssl
 import urllib.parse
+import traceback
+import sys
 from error import *
 
 class HTTP:
@@ -12,25 +14,49 @@ class HTTP:
         self.ssl = ssl
         self.response = ''
     
-    def get_req(self, path, params=None):
+    def _get_req(self, path, params=None):
         if params:
             path = f"{path}?{urllib.parse.urlencode(params)}"
-        self.request('GET', path)
+        self._request('GET', path)
+        return self.response
+
+    def get_req(self, path, params=None):
+        try:
+            return self._get_req(path, params)
+        except Exception as e:
+            print(str(e))
+            print(traceback.format_exc(file=sys.stdout))
+            raise RequestError()
+    
+    def _post_req(self, path, data, params=None):
+        if params:
+            path = f"{path}?{urllib.parse.urlencode(params)}"
+        self._request('POST', path, data)
         return self.response
 
     def post_req(self, path, data, params=None):
+        try:
+            return self._post_req(path, data, params)
+        except Exception as e:
+            print(str(e))
+            print(traceback.format_exc(file=sys.stdout))
+            raise RequestError()
+    
+    def _put_req(self, path, data, params=None):
         if params:
             path = f"{path}?{urllib.parse.urlencode(params)}"
-        self.request('POST', path, data)
+        self._request('PUT', path, data)
         return self.response
 
     def put_req(self, path, data, params=None):
-        if params:
-            path = f"{path}?{urllib.parse.urlencode(params)}"
-        self.request('PUT', path, data)
-        return self.response
-
-    def request(self, method, path, data=''):
+        try:
+            return self._put_req(path, data, params)
+        except Exception as e:
+            print(str(e))
+            print(traceback.format_exc(file=sys.stdout))
+            raise RequestError()
+    
+    def _request(self, method, path, data=''):
         self.response = ''
         if self.ssl:
             socket_ = ssl.wrap_socket(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
@@ -51,9 +77,9 @@ class HTTP:
         if not data:
             raise RequestError(data)
         self.response = data
-        self.decode_response()
+        self._decode_response()
     
-    def decode_response(self):
+    def _decode_response(self):
         response_header = self.response[:self.response.find(b'\r\n\r\n')].decode('utf-8')
         response_data = self.response[self.response.find(b'\r\n\r\n') + 4:]
         status_code = re.findall(r'HTTP/1.0 (.*?) ', response_header)[0]
