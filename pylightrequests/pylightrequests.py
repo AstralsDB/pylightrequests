@@ -5,7 +5,7 @@ import ssl
 import urllib.parse
 import traceback
 import sys
-from error import *
+from .error import *
 
 class HTTP:
     def __init__(self, host, port=80, ssl=False):
