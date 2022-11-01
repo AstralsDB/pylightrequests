@@ -34,23 +34,35 @@ from pylightrequests import *
 ```python
 from pylightrequests import *
 
-Lightt = HTTP()
+http = HTTP('example.com')
 
-data = Lightt.get_req("example.com", "/vuln.html")
-print(data.decode('utf-8'))
+# GET REQUEST
 
-data = Lightt.post_req("example.com", "/vuln.html", 'action=check&username=admin')
-print(data.decode('utf-8'))
 
-data = Lightt.request("get", "example.com", "/vuln.html")
-print(data.decode('utf-8'))
+# with params
+http.get_req('/', {'q': 'search'})
 
-data = Lightt.request("post", "example.com", "/vuln.html", 'action=check&username=admin')
-print(data.decode('utf-8'))
+# without params
+http.get_req('/')
 
-data = Lightt.request_multiprocess("put", "example.com", "/vuln.html", "action=check&username=admin", process_count=1000)
-for resp in data:
-    print(resp.get().decode('utf-8'))
+# POST REQUEST
+
+# with params
+http.post_req('/', {'q': 'search'})
+
+# without params
+http.post_req('/')
+
+# PUT REQUEST
+
+# with params
+http.put_req('/', {'q': 'search'})
+
+# without params
+http.put_req('/')
+
+# REQUEST
+http.request('GET', '/')
 ```
 
 
