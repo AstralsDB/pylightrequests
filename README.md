@@ -1,6 +1,10 @@
 # pylightrequests
 A super-fast HTTP Client made in Python, using sockets
 
+## Note
+
+- 14x faster than `requests`
+- Easy to use (real)
 
 ## Table of Contents
 <a name="table-of-contents"></a>
