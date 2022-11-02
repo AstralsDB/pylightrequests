@@ -55,27 +55,6 @@ print(http.request('get', 'google.com', '/'))
 
 # Request (multiprocess)
 print(http.request_multiprocess('get', 'google.com', '/'))
-
-# Parse data
-print(http.parse_data(http.request('get', 'google.com', '/')))
-
-# Get response code
-print(http.get_response_code())
-
-# Get status
-print(http.get_status())
-
-# Get header
-print(http.get_header())
-
-# Get json
-print(http.get_json())
-
-# Get json data
-print(http.get_json_data())
-
-# Get data
-print(http.get_data())
 ```
 
 
