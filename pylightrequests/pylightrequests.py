@@ -2,7 +2,7 @@ import ssl
 import socket
 import re
 import multiprocessing
-from error import *
+from .error import *
 
 class HTTP:
     def get_req(self, host, path, port=80, ssl=False):
