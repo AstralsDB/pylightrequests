@@ -5,6 +5,7 @@ A super-fast HTTP Client made in Python, using sockets
 
 - 14x faster than `requests`
 - Easy to use (real)
+![](https://cdn.discordapp.com/attachments/1023585021606498358/1037267841839288351/Screenshot_20221102-1530492.png)
 
 ## Table of Contents
 <a name="table-of-contents"></a>
